@@ -1,0 +1,12 @@
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="system" id="20200324090100">
+        <createSequence sequenceName="hibernate_sequence" cacheSize="20"
+                        startValue="1" incrementBy="1" ordered="true"/>
+    </changeSet>
+
+</databaseChangeLog>

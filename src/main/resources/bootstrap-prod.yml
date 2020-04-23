@@ -1,0 +1,28 @@
+# ===================================================================
+# Spring Cloud Config bootstrap configuration for the "prod" profile
+# ===================================================================
+
+shc:
+  registry:
+    password: admin
+
+spring:
+  application:
+    name: service-provider-api
+  profiles:
+    active: prod,git
+  cloud:
+    config:
+      uri: http://admin:${shc.registry.password}@localhost:8761/config
+      name: service-provider-api
+      profile: prod
+      label: master
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://admin:${shc.registry.password}@localhost:8761/eureka
