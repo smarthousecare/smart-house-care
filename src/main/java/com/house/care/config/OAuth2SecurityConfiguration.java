@@ -1,69 +1,31 @@
 package com.house.care.config;
 
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.AuthoritiesExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.web.util.matcher.RequestHeaderRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-
-import com.house.care.config.oauth2.SimpleAuthoritiesExtractor;
-import com.house.care.config.oauth2.SimplePrincipalExtractor;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 
 @Configuration
 @EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class OAuth2SecurityConfiguration extends ResourceServerConfigurerAdapter {
 
-    private static final String OAUTH2_PRINCIPAL_ATTRIBUTE = "preferred_username";
-
-    private static final String OAUTH2_AUTHORITIES_ATTRIBUTE = "groups";
-
-    @Bean
-    public PrincipalExtractor principalExtractor() {
-
-        return new SimplePrincipalExtractor(OAUTH2_PRINCIPAL_ATTRIBUTE);
-    }
-
-    @Bean
-    public AuthoritiesExtractor authoritiesExtractor() {
-
-        return new SimpleAuthoritiesExtractor(OAUTH2_AUTHORITIES_ATTRIBUTE);
-    }
-
-    @Bean
-    @Primary
-    public UserInfoTokenServices userInfoTokenServices(PrincipalExtractor principalExtractor, AuthoritiesExtractor authoritiesExtractor,
-            ResourceServerProperties resourceServerProperties) {
-
-        UserInfoTokenServices userInfoTokenServices = new UserInfoTokenServices(resourceServerProperties.getUserInfoUri(), resourceServerProperties.getClientId());
-        userInfoTokenServices.setPrincipalExtractor(principalExtractor);
-        userInfoTokenServices.setAuthoritiesExtractor(authoritiesExtractor);
-        return userInfoTokenServices;
-    }
-
-    @Bean
-    @Qualifier("authorizationHeaderRequestMatcher")
-    public RequestMatcher authorizationHeaderRequestMatcher() {
-
-        return new RequestHeaderRequestMatcher("Authorization");
-    }
+    @Value("${security.oauth2.client.clientId}")
+    private String clientIdentifier;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
 
         http
+                .httpBasic()
+                .disable()
                 .csrf()
                 .disable()
                 .headers()
@@ -73,7 +35,6 @@ public class OAuth2SecurityConfiguration extends ResourceServerConfigurerAdapter
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .requestMatcher(authorizationHeaderRequestMatcher())
                 .authorizeRequests()
                 .antMatchers("/services/**").authenticated()
                 .antMatchers("/api/profile-info").permitAll()
@@ -81,6 +42,7 @@ public class OAuth2SecurityConfiguration extends ResourceServerConfigurerAdapter
                 .antMatchers("/v3/api-docs").permitAll()
                 .antMatchers("/management/health").permitAll()
                 .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN);
+
     }
 
     @Bean
@@ -88,5 +50,11 @@ public class OAuth2SecurityConfiguration extends ResourceServerConfigurerAdapter
     protected ClientCredentialsResourceDetails oAuthDetails() {
 
         return new ClientCredentialsResourceDetails();
+    }
+
+    @Override
+    public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+
+        resources.resourceId(clientIdentifier);
     }
 }
