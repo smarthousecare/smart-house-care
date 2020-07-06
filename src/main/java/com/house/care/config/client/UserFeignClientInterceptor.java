@@ -1,9 +1,11 @@
 package com.house.care.config.client;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
@@ -14,16 +16,23 @@ public class UserFeignClientInterceptor implements RequestInterceptor {
 
     private static final String BEARER_TOKEN_TYPE = "Bearer";
 
+    private final OAuth2AuthorizedClientService clientService;
+
+    public UserFeignClientInterceptor(OAuth2AuthorizedClientService clientService) {
+
+        this.clientService = clientService;
+    }
+
     @Override
     public void apply(RequestTemplate template) {
 
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        Authentication authentication = securityContext.getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(
+                oauthToken.getAuthorizedClientRegistrationId(),
+                oauthToken.getName());
 
-        if (authentication != null && authentication.getDetails() instanceof OAuth2AuthenticationDetails) {
-
-            OAuth2AuthenticationDetails details = (OAuth2AuthenticationDetails) authentication.getDetails();
-            template.header(AUTHORIZATION_HEADER, String.format("%s %s", BEARER_TOKEN_TYPE, details.getTokenValue()));
-        }
+        OAuth2AccessToken accessToken = client.getAccessToken();
+        template.header(AUTHORIZATION_HEADER, String.format("%s %s", BEARER_TOKEN_TYPE, accessToken.getTokenValue()));
     }
 }

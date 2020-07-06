@@ -4,8 +4,10 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.house.care.config.client.FeignClientConfiguration;
+
 @Configuration
-@FeignClient(name = "${spring.application.name}", configuration = FeignConfiguration.class)
+@FeignClient(name = "${spring.application.name}", configuration = FeignClientConfiguration.class)
 public class FeignConfiguration {
 
     /**

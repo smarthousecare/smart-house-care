@@ -1,5 +1,7 @@
 package com.house.care.config.client;
 
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 
@@ -25,7 +27,7 @@ public class FeignClientConfiguration {
     @Bean
     public Request.Options options() {
 
-        return new Request.Options(connectTimeout, readTimeout);
+        return new Request.Options(connectTimeout, TimeUnit.SECONDS, readTimeout, TimeUnit.SECONDS, true);
     }
 
     @Bean
@@ -33,15 +35,4 @@ public class FeignClientConfiguration {
 
         return Logger.Level.FULL;
     }
-
-    // @Bean(name = "requestTokenBearerInterceptor")
-    // public RequestInterceptor requestTokenBearerInterceptor() {
-    //
-    // return requestTemplate -> {
-    //
-    // String token = SecurityUtils.getCurrentJwtToken();
-    // requestTemplate.header("Authorization", "bearer " + token);
-    // };
-    // }
-
 }

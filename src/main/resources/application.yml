@@ -28,9 +28,9 @@ feign:
 
 
 management:
-  security:
-    roles: ADMIN
-  context-path: /management
+  endpoints:
+    web:
+      base-path: /management
   health:
     mail:
       enabled: false # When using the MailService, configure an SMTP server and set this to true
@@ -42,21 +42,20 @@ eureka:
     prefer-ip-address: false
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
-    status-page-url-path: ${management.context-path}/info
-    health-check-url-path: ${management.context-path}/health
+    status-page-url-path: ${management.endpoints.web.base-path}/info
+    health-check-url-path: ${management.endpoints.web.base-path}/health
     metadata-map:
       zone: primary
       profile: ${spring.profiles.active}
       version: ${info.project.version}
   client:
-    client:
+    enabled: true
+    healthcheck:
       enabled: true
-      healthcheck:
-        enabled: true
-      fetch-registry: true
-      register-with-eureka: true
-      instance-info-replication-interval-seconds: 10
-      registry-fetch-interval-seconds: 10
+    fetch-registry: true
+    register-with-eureka: true
+    instance-info-replication-interval-seconds: 10
+    registry-fetch-interval-seconds: 10
 
 spring:
   application:
@@ -68,8 +67,3 @@ spring:
     allow-bean-definition-overriding: true
   liquibase:
     change-log: classpath:/db/changelog/changelog-master.xml
-
-springdoc:
-  api-docs:
-    groups:
-      enabled: true
