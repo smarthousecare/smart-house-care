@@ -10,7 +10,7 @@ spring:
   application:
     name: service-provider-api
   profiles:
-    active: prod,git
+    active: prod,native
   cloud:
     config:
       uri: http://admin:${shc.registry.password}@localhost:8761/config
