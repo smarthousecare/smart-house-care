@@ -18,10 +18,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.java.Log;
 
 @RestController
 @RequestMapping("/api")
 @Tag(name = "contact", description = "the Contact API")
+@Log
 public class ServiceProviderController {
 
     @Operation(summary = "Find Contacts by name", description = "Name search by %name% format", tags = { "contact" })
@@ -32,6 +34,7 @@ public class ServiceProviderController {
             @Parameter(description = "Page number, default is 1") @RequestParam(value = "page", defaultValue = "1") int pageNumber,
             @Parameter(description = "Name of the contact for search.") @RequestParam(required = false) String name) {
 
+        log.info("Test Sleuth");
         return null;
     }
 
